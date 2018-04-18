@@ -65,7 +65,8 @@ solc -o "$compileTargetDirectory" --optimize --overwrite --abi --bin "$contractA
 if [ $deploy = "true" ]; then
   echo "Deploying contract..."
   abi=$(cat "$compileTargetDirectory"/"$contractName".abi)
-  node deployContract.js "$contractName" $sender $password
+  scriptDirectory="$(get_abs_dir $0)"
+  node "$scriptDirectory"/deployContract.js "$contractAbsoluteFileName" $sender $password
 
   deploymentStatus=$?
 

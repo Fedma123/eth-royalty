@@ -42,8 +42,20 @@ function deploy(contract_file_name, sender, password, wait_for_deployment) {
 
     const abi_extension = '.abi';
     const bin_extension = '.bin';
-    const abi_filename = contract_file_name + abi_extension;
-    const bin_filename = contract_file_name + bin_extension;
+    const sol_extension = '.sol';
+    
+    var path = require('path');
+    const contract_absolute_path = path.resolve(contract_file_name);
+    const contract_base_name = path.basename(contract_absolute_path);
+    const contract_base_path = contract_absolute_path.replace(contract_base_name, '');
+
+    if (contract_absolute_path.includes(sol_extension))
+        var contract_base_name_without_extension = contract_base_name.replace(sol_extension, '');    
+    else
+        var contract_base_name_without_extension = contract_base_name;    
+        
+    const abi_filename = contract_base_path + 'compiled_contracts/' + contract_base_name_without_extension + abi_extension;
+    const bin_filename = contract_base_path + 'compiled_contracts/' + contract_base_name_without_extension + bin_extension;
 
     try {
         var abi = fs.readFileSync(abi_filename, 'utf8');
