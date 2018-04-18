@@ -4,3 +4,6 @@ CustomDataDir/
 #Ignorare cartella in cui sono stati installati i pacchetti
 #aggiuntivi di node.js
 src/node_modules/
+
+#Ignore compiled contracts directory
+src/contracts/compiled_contracts/
