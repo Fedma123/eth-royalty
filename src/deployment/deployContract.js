@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 
-//Script creato per la versione 0.20.1 dell'API web3
-//perché la versione locale di geth ha correntemente questa versione.
-//Nella versione 1.0.0 dell'API sono cambiate molte cose; per esempio
-//la proprietà web3.eth.coinbase è stata sostituita con web3.eth.getCoinbase()
+//Script reated for web3 PI version 0.20.1. In version 1.0.0 many things have changed
+//such as the property web3.eth.coinbase which has been substituted in
+//favor of web3.eth.getCoinbase()
+//
+//Pay A LOT of attention at documentation versions
 
-//Fare MOLTA attenzione alla versione a cui fa riferimento la documentazione online
 
 const Web3 = require('web3');
 var web3_http_endpoint = "http://localhost:8080"
@@ -17,12 +17,6 @@ const ReturnCodes = {
     NOT_DEPLOYED: 1,
     ERROR: 2
 }
-
-
-//Lanciare lo script da node passando come primo argomento il nome del contratto
-//compilato, il mittente del contratto e la password per sbloccare l'account mittente.
-//Il contratto NON viene ribloccato dopo il deploy.
-
 
 
 function is_mining() {
@@ -37,7 +31,7 @@ function is_mining() {
     return result;
 }
 
-// Se la fuzione incontra un qualsiasi errore ritorna 1, 0 altrimenti.
+
 function deploy(contract_file_name, sender, password, wait_for_deployment) {        
 
     const abi_extension = '.abi';
@@ -91,8 +85,7 @@ function deploy(contract_file_name, sender, password, wait_for_deployment) {
     try {            
         if (wait_for_deployment){
             const max_poll_cycles = 10;
-
-            //var contract = contract_abi.new(deploy_transaction_object);
+            
             var contract = contract_abi.new(hc_resource_hash, hc_resource_name, hc_resource_min_price, deploy_transaction_object);
             var contract_address = "";
             var sleep = require('system-sleep');
