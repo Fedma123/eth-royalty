@@ -5,8 +5,8 @@ function get_abs_dir {
 }
 
 customDataDir="$(get_abs_dir $0)""/../CustomDataDir"
-customGenesisJson="genesis.json"
-keystoreDir="keystore"
+customGenesisJson="$(get_abs_dir $0)""/genesis.json"
+keystoreDir="$(get_abs_dir $0)""/keystore"
 
 if [ ! -f $customGenesisJson ]; then
     echo "Custom genesis file not found!"
