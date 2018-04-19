@@ -76,21 +76,21 @@ if [ $deploy = "true" ]; then
 
   declare -a lines
 
-  while read -r line; do
+  while read line; do
     lines+=($line)
-  done <tmp_deploy_result.txt
+  done < "$compileTargetDirectory"/tmp_deploy_result.txt
 
   contractAddress=${lines[0]}
-  transactionHash=${lines[1]}
+  #transactionHash=${lines[1]}
 
   command="var "$contractName"RawAbi='$abi'; "
   command+="var "$contractName"Abi=eth.contract(JSON.parse("$contractName"RawAbi)); "
   command+="var "$contractName"="$contractName"Abi.at(\"$contractAddress\"); "
-  echo "$command" > "$contractName".js
+  echo "$command" > "$compileTargetDirectory"/"$contractName".js
 
   echo "Generated "$contractName".js. To use your contract load this script in geth."
 
-  rm tmp_deploy_result.txt
+  rm "$compileTargetDirectory"/tmp_deploy_result.txt
 
 else 
   echo "Contract deployment skipped."

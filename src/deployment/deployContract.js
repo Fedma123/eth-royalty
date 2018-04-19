@@ -23,7 +23,7 @@ const ReturnCodes = {
 //compilato, il mittente del contratto e la password per sbloccare l'account mittente.
 //Il contratto NON viene ribloccato dopo il deploy.
 
-const tmp_result_filename = "tmp_deploy_result.txt"
+
 
 function is_mining() {
     var result = false;
@@ -56,6 +56,7 @@ function deploy(contract_file_name, sender, password, wait_for_deployment) {
         
     const abi_filename = contract_base_path + 'compiled_contracts/' + contract_base_name_without_extension + abi_extension;
     const bin_filename = contract_base_path + 'compiled_contracts/' + contract_base_name_without_extension + bin_extension;
+    const tmp_result_filename = contract_base_path + 'compiled_contracts/' + 'tmp_deploy_result.txt';    
 
     try {
         var abi = fs.readFileSync(abi_filename, 'utf8');
@@ -83,9 +84,44 @@ function deploy(contract_file_name, sender, password, wait_for_deployment) {
     var contract_abi = web3.eth.contract(JSON.parse(abi));
     var deploy_transaction_object = { from: sender, data: bin, gas: 1000000 };
 
+    var hc_resource_hash = 0xd8752fc4a6e944ef5341f7a155637c520bb09968571ce978de7bae951cbfc9de;
+    var hc_resource_name = "img.jpg";
+    var hc_resource_min_price = 500000000000000000;
+
     try {            
-        if (wait_for_deployment)
-            contract_abi.new(deploy_transaction_object, deployed);
+        if (wait_for_deployment){
+            const max_poll_cycles = 10;
+
+            //var contract = contract_abi.new(deploy_transaction_object);
+            var contract = contract_abi.new(hc_resource_hash, hc_resource_name, hc_resource_min_price, deploy_transaction_object);
+            var contract_address = "";
+            var sleep = require('system-sleep');
+
+            for(var poll_cycle = 0; poll_cycle < max_poll_cycles; poll_cycle++)
+            {
+                var tx_receipt = web3.eth.getTransactionReceipt(contract.transactionHash);
+                
+                if (tx_receipt) {
+                    contract_address = tx_receipt.contractAddress;
+                    break;
+                }
+
+                sleep(3000);
+                console.log("Waiting for contrat to be mined...");
+            }
+
+            if (contract_address == "")
+            {
+                console.log("Contract not mined yet. TX_Hash: " + contract.transactionHash);
+                return 2;
+            } 
+            else
+            {
+                fs.writeFileSync(tmp_result_filename, contract_address + '\n');
+                console.log('Contract mined! address: ' + contract_address + ' transactionHash: ' + contract.transactionHash);
+            } 
+        }
+            
         else{
             contract_abi.new(deploy_transaction_object);
             console.log('Submitted contract creation');
@@ -97,17 +133,6 @@ function deploy(contract_file_name, sender, password, wait_for_deployment) {
     }
 
     return 0;
-}
-
-function deployed (e, contract){
-    //console.log(e, contract);
-    if (typeof contract.address !== 'undefined') {
-        var result_data = contract.address + "\n" + contract.transactionHash;
-    
-        fs.writeFile(tmp_result_filename, result_data);
-
-        console.log('Contract mined! address: ' + contract.address + ' transactionHash: ' + contract.transactionHash);
-    }
 }
 
 function get_usage()
@@ -153,7 +178,7 @@ var return_code = ReturnCodes.OK;
 
 if (deploy_result == 1)
     return_code = ReturnCodes.ERROR;
-else if (!mining)
+else if (!mining || deploy_result == 2)
     return_code = ReturnCodes.NOT_DEPLOYED;
 
 process.exit(return_code);
