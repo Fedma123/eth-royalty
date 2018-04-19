@@ -1,6 +1,6 @@
 ##############################################
-# Script per la compilazione ed il deploy    #
-# di uno smart contract su blockchain locale #
+# Script for smart contract compilation and  #
+# deployment on local blockchain             #
 ##############################################
 
 
@@ -17,17 +17,34 @@ function get_abs_dir {
 sender="0x5dfe021f45f00ae83b0aa963be44a1310a782fcc"
 password="iloveethereum"
 deploy="true"
+resourceName="img.jpeg"
+resourceHash="0xd8752fc4a6e944ef5341f7a155637c520bb09968571ce978de7bae951cbfc9de"
+resourceMinPrice=0.009 #almost 5 euros as of 19/04/18
 
-while getopts ":s:p:n" opt; do
+while getopts ":s:p:w:n:h:d" opt; do
   case ${opt} in
     s )
       sender="$OPTARG"
       ;;
-    p )
+    w )
       password="$OPTARG"
       ;;
-    n )
+    d )
       deploy="false"
+      ;;
+    p )
+      if [[ $OPTARG =~ ^[0-9]+'.'?[0-9]*$ ]]; then
+          resourceMinPrice=$OPTARG
+      else
+          echo "p (minPrice) must be float"
+          exit 1
+      fi
+      ;;
+    h )
+      resourceHash="$OPTARG"
+      ;;
+    n )
+      resourceName="$OPTARG"
       ;;
     \? )
       echo "Invalid option: $OPTARG" 1>&2
@@ -66,7 +83,7 @@ if [ $deploy = "true" ]; then
   echo "Deploying contract..."
   abi=$(cat "$compileTargetDirectory"/"$contractName".abi)
   scriptDirectory="$(get_abs_dir $0)"
-  node "$scriptDirectory"/deployContract.js "$contractAbsoluteFileName" $sender $password
+  node "$scriptDirectory"/deployContract.js "$contractAbsoluteFileName" $sender $password $resourceHash $resourceName $resourceMinPrice
 
   deploymentStatus=$?
 

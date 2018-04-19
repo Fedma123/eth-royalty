@@ -32,7 +32,7 @@ function is_mining() {
 }
 
 
-function deploy(contract_file_name, sender, password, wait_for_deployment) {        
+function deploy(contract_file_name, sender, password, wait_for_deployment, resource_hash, resource_min_price, resource_name) {        
 
     const abi_extension = '.abi';
     const bin_extension = '.bin';
@@ -78,15 +78,11 @@ function deploy(contract_file_name, sender, password, wait_for_deployment) {
     var contract_abi = web3.eth.contract(JSON.parse(abi));
     var deploy_transaction_object = { from: sender, data: bin, gas: 1000000 };
 
-    var hc_resource_hash = 0xd8752fc4a6e944ef5341f7a155637c520bb09968571ce978de7bae951cbfc9de;
-    var hc_resource_name = "img.jpg";
-    var hc_resource_min_price = 500000000000000000;
-
     try {            
         if (wait_for_deployment){
             const max_poll_cycles = 10;
             
-            var contract = contract_abi.new(hc_resource_hash, hc_resource_name, hc_resource_min_price, deploy_transaction_object);
+            var contract = contract_abi.new(resource_hash, resource_name, resource_min_price, deploy_transaction_object);
             var contract_address = "";
             var sleep = require('system-sleep');
 
@@ -130,17 +126,24 @@ function deploy(contract_file_name, sender, password, wait_for_deployment) {
 
 function get_usage()
 {
-    return 'Usage: node filename sender password';
+    return 'Usage: node deployContract.js contract sender password hash name min_price';
 }
 
-if (process.argv.length != 5) {
+if (process.argv.length != 8) {
     console.log(get_usage());
     process.exit(1);
 }
 
+var contract_file = process.argv[2];
+var sender        = process.argv[3];
+var password      = process.argv[4];
+var hash          = process.argv[5];
+var name          = process.argv[6];
+var min_price     = process.argv[7];
+
 var mining_answer = '';
-var readlineSync = require('readline-sync');
-var mining = is_mining();
+var readlineSync  = require('readline-sync');
+var mining        = is_mining();
  
 if (mining)
     mining_answer = 'y';
@@ -160,7 +163,7 @@ while(!mining && mining_answer == '')
 
 if (mining_answer != 'n') {
     console.log('Deployment started.');
-    var deploy_result = deploy(process.argv[2], process.argv[3], process.argv[4], mining);
+    var deploy_result = deploy(contract_file, sender, password, mining, hash, min_price, name);
 }
 else
     console.log('Deployment skipped.');
