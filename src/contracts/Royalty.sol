@@ -2,8 +2,8 @@ pragma solidity ^0.4.21;
 
 contract Royalty {
     address owner;
-    uint32 public resourceHash; //obtained by using sha256
-    string public resourceName; //Expensive
+    string public resourceHash;
+    string public resourceName; 
     //May be used to prove the owner was the first to "register"
     //the resource in case of a dispute.
     uint public contractMinedTimestamp;
@@ -17,7 +17,7 @@ contract Royalty {
         _;
     }
 
-    function Royalty(uint32 resHash, string resName, uint256 minimumPriceInWei) public {
+    function Royalty(string resHash, string resName, uint256 minimumPriceInWei) public {
         owner = msg.sender;
         resourceHash = resHash;
         resourceName = resName;        
