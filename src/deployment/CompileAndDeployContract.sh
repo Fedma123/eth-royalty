@@ -33,10 +33,10 @@ while getopts ":s:p:w:n:h:d" opt; do
       deploy="false"
       ;;
     p )
-      if [[ $OPTARG =~ ^[0-9]+'.'?[0-9]*$ ]]; then
+      if [[ $OPTARG =~ ^[0-9]+$ ]]; then
           resourceMinPrice=$OPTARG
       else
-          echo "p (minPrice) must be float"
+          echo "p (minPrice) must be unsigned integer"
           exit 1
       fi
       ;;
