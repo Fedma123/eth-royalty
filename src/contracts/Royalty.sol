@@ -1,4 +1,4 @@
-pragma solidity ^0.4.21;
+pragma solidity ^0.4.23;
 
 contract Royalty {
     address owner;
@@ -17,7 +17,7 @@ contract Royalty {
         _;
     }
 
-    function Royalty(string resHash, string resName, uint256 minimumPriceInWei) public {
+    constructor(string resHash, string resName, uint256 minimumPriceInWei) public {
         owner = msg.sender;
         resourceHash = resHash;
         resourceName = resName;        
