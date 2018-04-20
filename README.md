@@ -23,7 +23,7 @@ solc is the Solidity compiler. This smart contract is written using solc version
 ### Usage example
 Here's a simple example demonstrating the smart contract interaction through geth console. The ">" prompt symbol refers to the geth console, while "$" to a normal command line.
 
-Before starting this example make sure to start mining, otherwise the transactions involved will not be mined. In order to start mining we can start a geth console and execute this command
+Before starting this example make sure to start mining, otherwise the transactions involved will not be mined. In order to start mining we can start a geth console and execute this command:
 
 	> miner.start(1)
 	true
@@ -33,7 +33,7 @@ The account set as coinbase will start mining all transactions. Since the termin
 
 Before executing the command above make sure to *cd* into the *compiled_contracts* directory in order to easily load the contract scripts.
 
-When we initialize our local blockchain, we start with some accounts with an arbitrary amount of ether preallocated. We chose three of them for this example. Aldo will be the miner (*coinbase*); Carlo has already deployed a Royalty contract, and Bacco wishes to purchase Carlo's royalty. 
+When we initialize our local blockchain with this project's scripts, we start with some accounts with an arbitrary amount of ether preallocated. We choose three of them for this example. Aldo will be the miner (*coinbase*); Carlo has already deployed a Royalty contract, and Bacco wishes to purchase Carlo's royalty. 
 
 	> Aldo = eth.accounts[0]
 	"0x5dfe021f45f00ae83b0aa963be44a1310a782fcc"
@@ -52,7 +52,7 @@ Initially the smart contract deployed by Carlo will have a balance of 0 wei sinc
 	> eth.getBalance(Royalty.address)
 	0
 	
-Bacco, initially starts with a balance of 10 ether
+Bacco, initially starts with a balance of 10 ether.
 
 	> eth.getBalance(Bacco)
 	10000000000000000000
@@ -128,7 +128,7 @@ Now both Bacco and Carlo can check that the amount of ether has been succesfully
 	> eth.getBalance(Royalty.address)
 	9000000000000000
 
-Anybody can inspect wether some account has already payed the royalty, so Bacco checks he's been successfully added among the payers.
+Anybody can inspect whether some account has already payed the royalty, so Bacco checks he's been successfully added among the payers.
 
 	> Royalty.HasAlreadyPayed(Bacco, {from: Bacco})
 	true
