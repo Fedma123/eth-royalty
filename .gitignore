@@ -1,8 +1,7 @@
-#Ignorare cartella in cui istanziare la blockchain locale
+#Ignore directory containing the local blockchain
 CustomDataDir/
 
-#Ignorare cartella in cui sono stati installati i pacchetti
-#aggiuntivi di node.js
+#Ignore folder containing node.js modules
 src/node_modules/
 
 #Ignore compiled contracts directory
