@@ -112,8 +112,8 @@ function deploy(contract_file_name, sender, password, wait_for_deployment, resou
         }
             
         else{
-            contract_abi.new(deploy_transaction_object);
-            console.log('Submitted contract creation');
+            var result = contract_abi.new(deploy_transaction_object);
+            console.log('Submitted contract creation. TX_Hash: ' + result.transactionHash);
         }
                
     } catch (error) {
