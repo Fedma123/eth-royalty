@@ -96,7 +96,7 @@ function deploy(contract_file_name, sender, password, wait_for_deployment, resou
                 }
 
                 sleep(3000);
-                console.log("Waiting for contrat to be mined...");
+                console.log("Waiting for contract to be mined...");
             }
 
             if (contract_address == "")
