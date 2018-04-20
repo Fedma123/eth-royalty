@@ -16,7 +16,7 @@ The project depends on node version v6.11.4 and the following javascript package
 * system-sleep 1.3.6
 * readline-sync 1.4.9
 #### solc
-solc is the Solidity compiler. This smart contract is written using solc version 0.4.21
+solc is the Solidity compiler. This smart contract is written using solc version 0.4.23
 
 ### Contract deployment
 
