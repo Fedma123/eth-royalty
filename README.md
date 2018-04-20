@@ -20,6 +20,144 @@ solc is the Solidity compiler. This smart contract is written using solc version
 
 ### Contract deployment
 
+### Usage example
+Here's a simple example demonstrating the smart contract interaction through geth console. The ">" prompt symbol refers to the geth console, while "$" to a normal command line.
+
+Before starting this example make sure to start mining, otherwise the transactions involved will not be mined. In order to start mining we can start a geth console and execute this command
+
+	> miner.start(1)
+	true
+The account set as coinbase will start mining all transactions. Since the terminal used for mining will become cluttered with mining logs, we can open another one and attach geth to the same node by executing:
+
+	$ geth attach http://localhost:8080
+
+Before executing the command above make sure to *cd* into the *compiled_contracts* directory in order to easily load the contract scripts.
+
+When we initialize our local blockchain, we start with some accounts with an arbitrary amount of ether preallocated. We chose three of them for this example. Aldo will be the miner (*coinbase*); Carlo has already deployed a Royalty contract, and Bacco wishes to purchase Carlo's royalty. 
+
+	> Aldo = eth.accounts[0]
+	"0x5dfe021f45f00ae83b0aa963be44a1310a782fcc"
+	> Bacco = eth.accounts[1]
+	"0xfe2b768a23948eddd7d7caea55baa31e39045382"
+	> Carlo = eth.accounts[2]
+	"0xa9a418da22532bd1189ff8be5cdaf3570bf9da43"
+	
+We load the script so we can conviniently interact with the smart contract through the web3 API.
+
+	> loadScript('Royalty.js')
+	true
+	
+Initially the smart contract deployed by Carlo will have a balance of 0 wei since nobody has purchased his royalty yet.
+
+	> eth.getBalance(Royalty.address)
+	0
+	
+Bacco, initially starts with a balance of 10 ether
+
+	> eth.getBalance(Bacco)
+	10000000000000000000
+	
+In order to spend his ether Bacco first needs to unlock his account.
+
+	> personal.unlockAccount(Bacco)
+	Unlock account 0xfe2b768a23948eddd7d7caea55baa31e39045382
+	Passphrase: 
+	true
+	
+Then Bacco checks what's the minimum price for Carlo's royalty.
+
+	> Royalty.minimumPriceWei({from: Bacco})
+	9000000000000000
+	
+This price seems fair to Bacco, but he's not willing to spend any more than that, so he purchases Carlo's royalty at the minimum price.
+
+	> Royalty.Purchase({from: Bacco, value: 9000000000000000})
+	"0x1ccbcaaa13204f1c8931655020daddab9817ece337e9755e2cca79940ae0daed"
+
+Now Bacco checks whether the transaction has been mined by using the transaction hash returned by the Purchase function.
+
+	> eth.getTransaction("0x1ccbcaaa13204f1c8931655020daddab9817ece337e9755e2cca79940ae0daed")
+	{
+	  blockHash: "0x31b45d371a3dab3228889f9d533891e2972b621f6db14179b9673e65f9b34dcc",
+	  blockNumber: 340,
+	  from: "0xfe2b768a23948eddd7d7caea55baa31e39045382",
+	  gas: 90000,
+	  gasPrice: 18000000000,
+	  hash: "0x1ccbcaaa13204f1c8931655020daddab9817ece337e9755e2cca79940ae0daed",
+	  input: "0x49c15bd9",
+	  nonce: 0,
+	  r: "0x27466a77a58413d310a67a3d2ff700f3d51ee04466680ed0f4ea94aa5387a127",
+	  s: "0x6e4c3ebd9761c8477f35486f05eb7051c2bc0d9e981806d9feb378c0505115ff",
+	  to: "0xc42b3f402b2d95c9e9b0baacff040a1de64af86c",
+	  transactionIndex: 0,
+	  v: "0xa95",
+	  value: 9000000000000000
+	}
+The transaction has been mined since it has been included in block number 340! Bacco also wants to check how much the transaction cost, so in order to do that he has to get the amount of gas used.
+
+	> eth.getTransactionReceipt("0x1ccbcaaa13204f1c8931655020daddab9817ece337e9755e2cca79940ae0daed")
+	{
+	  blockHash: "0x31b45d371a3dab3228889f9d533891e2972b621f6db14179b9673e65f9b34dcc",
+	  blockNumber: 340,
+	  contractAddress: null,
+	  cumulativeGasUsed: 67436,
+	  from: "0xfe2b768a23948eddd7d7caea55baa31e39045382",
+	  gasUsed: 67436,
+	  logs: [],
+	  logsBloom: "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+	  root: "0xf2877a30d93b1d45ff7808e399c199761518ac750dfbee9371113f058e590bdd",
+	  to: "0xc42b3f402b2d95c9e9b0baacff040a1de64af86c",
+	  transactionHash: "0x1ccbcaaa13204f1c8931655020daddab9817ece337e9755e2cca79940ae0daed",
+	  transactionIndex: 0
+	}
+
+The transaction used 67436 gas and Bacco set the gasPrice to the default value of 18000000000, so the transaction itself cost:
+
+	> web3.fromWei(67436 * 18000000000, 'ether')
+	"0.001213848"
+which is around 0.67 euros by April 2018.
+So when Bacco checks his balance he finds out that he has spent the amount due to Carlo plus the transaction cost.
+
+	> eth.getBalance(Bacco)
+	9989786152000000000
+	> 10000000000000000000 - 9000000000000000 - 67436 * 18000000000
+	9989786152000000000
+	
+Now both Bacco and Carlo can check that the amount of ether has been succesfully transfered from Bacco's account to the Royalty account.
+
+	> eth.getBalance(Royalty.address)
+	9000000000000000
+
+Anybody can inspect wether some account has already payed the royalty, so Bacco checks he's been successfully added among the payers.
+
+	> Royalty.HasAlreadyPayed(Bacco, {from: Bacco})
+	true
+
+Bacco is also curious about knowing whether Aldo has also purchased the royalty.
+
+	> Royalty.HasAlreadyPayed(Aldo, {from: Bacco})
+	false
+	
+Now Carlo can withdraw all of his Royalty balance.
+
+	> personal.unlockAccount(Carlo)
+	Unlock account 0xa9a418da22532bd1189ff8be5cdaf3570bf9da43
+	Passphrase: 
+	true
+	> eth.getBalance(Carlo)
+	19980673508000000000
+	> Royalty.Withdraw({from: Carlo})
+	"0xf1ef11f59759431ad2498c2ad6be2ed077c8248478119482112962aaac21dcf3"
+	> eth.getBalance(Carlo)
+	19989137036000000000
+	
+Again some ether of Carlo's account have been used to pay for the transaction.
+Carlo can now check that he's withdrawn all his Royalty balance.
+
+	> eth.getBalance(Royalty.address)
+	0
+
+
 ## Description
 
 ### Summary
