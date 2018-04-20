@@ -18,7 +18,7 @@ The project depends on node version v6.11.4 and the following javascript package
 
 You can install them in the *src/* directory located at project root through *npm* since the directory *src/node_modules* is already ignored by git.
 #### solc
-solc is the Solidity compiler. This smart contract is written using solc version 0.4.23. You can install sol by following the official [solc installation instructions](http://solidity.readthedocs.io/en/v0.4.23/installing-solidity.html).
+solc is the Solidity compiler. This smart contract is written using solc version 0.4.23. You can install solc by following the official [solc installation instructions](http://solidity.readthedocs.io/en/v0.4.23/installing-solidity.html).
 
 ### Contract deployment
 
