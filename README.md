@@ -20,9 +20,149 @@ You can install them in the *src/* directory located at project root through *np
 #### solc
 solc is the Solidity compiler. This smart contract is written using solc version 0.4.23. You can install solc by following the official [solc installation instructions](http://solidity.readthedocs.io/en/v0.4.23/installing-solidity.html).
 
-### Contract deployment
 
-### Usage example
+### Local blockchain
+#### Initialization
+If you are just starting out, or you want to completely reset an existing instance of your local blockchain, you should execute the script *InitializeTestChain.sh* located in the *init/* directory. This script will delete any preexisting blockchain and create a directory called *CustomDataDir* at the root of the project, which will be used to store all local blockchain related data. The script will also provide a set of accounts with some ether preallocated to get you started right away. The command is :
+
+	$ ./init/InitializeTestChain.sh
+	
+this directory is already ignored by git.
+
+#### Interaction
+Now that you have successfully created your local blockchain, you can interact with it through the geth console. In order to start one you can execute the script *StartConsole.sh*
+
+	$ ./init/StartConsole.sh
+
+This command opens the main geth console exposing several endpoints so that you can connect to it from another process. This geth console is the one that will be used to diplay mining logs. Once you start mining it will become unusable due to the continuous flow of log entries, so you should open a new terminal and attach to the main geth console from its HTTP endpoint, which is by default http://localhost:8080. To that you can simply execute:
+
+	$ geth attach http://localhost:8080
+
+To start mining, execute this command on the main geth console:
+
+	> miner.start(1)
+
+### Contract deployment
+In order to deploy a contract you can use the *CompileAndDeployContract.sh* script located in *src/deployment*. This script is specifically tailored on the royalty smart contract in order to simplify its deployment.
+
+#### Sample contract
+For demonstration purposes all parameters have a default value in order to provide an example contract to start with. You can deploy the example contract by executing:
+
+	$ ./src/deployment/CompileAndDeployContract.sh src/contracts/Royalty.sol
+
+If you haven't already started mining the script warns you. For easy deployment of the sample contract it's suggested that you start mining before deploying, even if it's not necessary. More on that later.
+
+A sample of the script output may be this:
+
+	Compiling Royalty bin and abi...
+	Deploying contract...
+	It looks like your local instance is not mining.
+	Would you like to deploy the contract anyway? Press enter to retry. (y, n) :
+	Deployment started.
+	Waiting for contract to be mined...
+	Waiting for contract to be mined...
+	Contract mined! address: 0x8952e7b945d6a03525dd8eda0e02d5f2f6081304 transactionHash: 0x30843113d2b153d46bbccaf3bc777d9dfc189d6ac9793981796b49c0f46296b4
+	Finished.
+	Generated Royalty.js. To use your contract load this script in geth.
+	
+The script generated the script *Royalty.js* in *src/contracts/compiled_contracts/* which, once loaded in geth, automates the creation of javascript variables that allow the interaction with the deployed contract. These variables are:
+
+* RoyaltyRawAbi: a string containing the contract ABI
+* RoyaltyAbi: the contract ABI object
+* **Royalty**: the actual deployed contract. This is the variable we're going to use to interact with the deployed contract.
+
+For easy loading of the *Royalty.js* script, *cd* into *src/contracts/compiled_contracts/* and then execute:
+
+	$ geth attach http://localhost:8080
+Once the geth console has started, execute this command:
+
+	> loadScript('Royalty.js')
+	true
+Now, all the abovementioned variables have been automatically created for you, and you can start to interact with your contract. More about contract interaction in **Usage example** below.
+#### Custom contract
+
+The *CompileAndDeployContract.sh* script lets you specify the following option:
+
+* -s sender 
+(the address of the contract owner)
+* -w password 
+(the sender's account password)
+* -d 
+(do not deploy)
+* -p minimum_price 
+(the price must bei in wei)
+* -h resource_hash 
+(computed with any algorithm)
+* -n resource_name
+(the resource name)
+
+Let's say we have created the best GIF ever, and now we want to let everybody be able to pay royalties on it.
+First we need a way to compute its hash, for example by using the SHA256 algorithm.
+
+	$ sha256sum myFavouriteGif.gif 
+	b5b70af6e17ce3c99b570c671dc4060e8827ffc810f9b419530903594153e5ba  myFavouriteGif.gif
+	
+Then we need to establish the resource minimum price (90000000000000 wei) and name (myFavouriteGif.gif). Once we'done that we're ready to deploy! Let's say we want to deploy our contract with the second account among the default ones. We can get its address with the following command in geth console:
+
+	> eth.accounts[1]
+	"0xfe2b768a23948eddd7d7caea55baa31e39045382"
+
+Let's run the following command setting the appropriate options:
+
+	$ src/deployment/CompileAndDeployContract.sh -s 0xfe2b768a23948eddd7d7caea55baa31e39045382 -w iloveethereum -n myFavouriteGif.gif -p 90000000000000 -h 0xb5b70af6e17ce3c99b570c671dc4060e8827ffc810f9b419530903594153e5ba src/contracts/Royalty.sol
+	Compiling Royalty bin and abi...
+	Deploying contract...
+	Deployment started.
+	Waiting for contract to be mined...
+	Waiting for contract to be mined...
+	Contract mined! address: 0x59d01dcbcc58224f21ddf5063a1070a37b29f6ec transactionHash: 0xcd82014f328cf5ef2fe636818340b79b8614cc667febcd17506523619566d63d                                                     
+	Finished.
+	Generated Royalty.js. To use your contract load this script in geth.
+	
+#### Manual contract variable creation in geth
+If for some reason the contract can't be mined while the *CompileAndDeployContract.sh* script is wating, or you decide to submit its creation when you're not mining, you can still instantiate those variables but you have to do it "manually". A possible output can be the following:
+
+	$ ./src/deployment/CompileAndDeployContract.sh src/contracts/Royalty.sol
+	Compiling Royalty bin and abi...
+	Deploying contract...
+	It looks like your local instance is not mining.
+	Would you like to deploy the contract anyway? Press enter to retry. (y, n) : y
+	Deployment started.
+	Submitted contract creation. TX_Hash: 0xe647968f52cd38e4cc719d0176ca66730cb16d508d8273dc49b7f1d2f7c7160c
+	Finished.
+	
+Once the contract is mined you can get its address with the following command:
+
+	> eth.getTransactionReceipt("<paste your transaction hash here>")
+	{
+	  blockHash: "0x9982b1ef800ddce1d9f30c555b40afb3d1ad166a46f2ba397d8931de178596f7",
+	  blockNumber: 269,
+	  contractAddress: "0x0e79d2b4d0dc8a9e4ad8f4196314448f93f7569b",
+	  cumulativeGasUsed: 850356,
+	  from: "0x5dfe021f45f00ae83b0aa963be44a1310a782fcc",
+	  gasUsed: 425178,
+	  logs: [],
+	  logsBloom: "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+	  root: "0x1f5c6648157f034a1aaf23787c0fc7ead79afb91108a95ca44e6014ebd22a66e",
+	  to: null,
+	  transactionHash: "<your transaction hash>",
+	  transactionIndex: 1
+	}
+where *getTransactionReceipt* accepts as argument the transaction hash that submitted your contract creation. If the contract is not mined yet the command above will return *null*.
+
+Once you've got the contract address you have to first store the contract ABI in a variable. You can get the contract's ABI in the file *src/contracts/compiled_contracts/Royalty.abi*.
+
+	> RoyaltyRawAbi = '<paste your abi here>'
+
+Remember to **enclose the ABI between single quotes**!
+Then you have to parse it and create a contract with that ABI:
+	
+	> RoyaltyAbi = eth.contract(JSON.parse(RoyaltyRawAbi))
+
+Finally you create an instance of the Royalty contract:
+
+	> Royalty=RoyaltyAbi.at("<paste your contract address here>")
+## Usage example
 Here's a simple example demonstrating the smart contract interaction through geth console. The ">" prompt symbol refers to the geth console, while "$" to a normal command line.
 
 Before starting this example make sure to start mining, otherwise the transactions involved will not be mined. In order to start mining we can start a geth console and execute this command:
