@@ -19,7 +19,7 @@ password="iloveethereum"
 deploy="true"
 resourceName="img.jpeg"
 resourceHash="0xd8752fc4a6e944ef5341f7a155637c520bb09968571ce978de7bae951cbfc9de"
-resourceMinPrice=0.009 #almost 5 euros as of 19/04/18
+resourceMinPrice="9000000000000000" #almost 5 euros as of 19/04/18
 
 while getopts ":s:p:w:n:h:d" opt; do
   case ${opt} in
