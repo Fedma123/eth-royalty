@@ -8,15 +8,17 @@ This is a project for royalty management using ethereum blockchain. The project 
 #### Ubuntu OS
 Some components the project depends on (solc) are not supported by other linux distros such as Debian. The project has not been tested on Ubuntu-based distributions.
 #### Geth
-The project uses geth to interact with the smart contract. The geth version the project is developed on is 1.8.4. You can install geth by following the [installation instructions](https://github.com/ethereum/go-ethereum/wiki/Building-Ethereum).
+The project uses geth to interact with the smart contract. The geth version the project is developed on is 1.8.4. You can install geth by following the [geth installation instructions](https://github.com/ethereum/go-ethereum/wiki/Building-Ethereum).
 #### Node.js
 The project depends on node version v6.11.4 and the following javascript packages:
 
 * web3 0.20.1 
 * system-sleep 1.3.6
 * readline-sync 1.4.9
+
+You can install them in the *src/* directory located at project root through *npm* since the directory *src/node_modules* is already ignored by git.
 #### solc
-solc is the Solidity compiler. This smart contract is written using solc version 0.4.23
+solc is the Solidity compiler. This smart contract is written using solc version 0.4.23. You can install sol by following the official [solc installation instructions](http://solidity.readthedocs.io/en/v0.4.23/installing-solidity.html).
 
 ### Contract deployment
 
