@@ -23,18 +23,19 @@ solc is the Solidity compiler. This smart contract is written using solc version
 
 ### Local blockchain
 #### Initialization
-If you are just starting out, or you want to completely reset an existing instance of your local blockchain, you should execute the script *InitializeTestChain.sh* located in the *init/* directory. This script will delete any preexisting blockchain and create a directory called *CustomDataDir* at the root of the project, which will be used to store all local blockchain related data. The script will also provide a set of accounts with some ether preallocated to get you started right away. The command is :
+If you are just starting out, or you want to completely reset an existing instance of your local blockchain, you should execute the script *InitializeTestChain.sh* located in the *init/* directory. This script will delete any preexisting blockchain and create a directory called *CustomDataDir* at the root of the project, which will be used to store all local blockchain related data. The script will also provide a set of accounts with some ether preallocated to get you started right away. The command is:
 
 	$ ./init/InitializeTestChain.sh
 	
 this directory is already ignored by git.
+The initialization scripts have been brutally copied from [chafey/ethereum-private-network](https://github.com/chafey/ethereum-private-network). Thanks [chafey](https://github.com/chafey) for having allowed me to save some time.
 
 #### Interaction
-Now that you have successfully created your local blockchain, you can interact with it through the geth console. In order to start one you can execute the script *StartConsole.sh*
+Now that you have successfully created your local blockchain, you can interact with it through the geth console. In order to start one, you can execute the script *StartConsole.sh*
 
 	$ ./init/StartConsole.sh
 
-This command opens the main geth console exposing several endpoints so that you can connect to it from another process. This geth console is the one that will be used to diplay mining logs. Once you start mining it will become unusable due to the continuous flow of log entries, so you should open a new terminal and attach to the main geth console from its HTTP endpoint, which is by default http://localhost:8080. To that you can simply execute:
+This command opens the main geth console exposing several endpoints so that you can connect to it from another process. This geth console is the one that will be used to display mining logs. Once you start mining it will become unusable due to the continuous flow of log entries, so you should open a new terminal and attach to the main geth console from its HTTP endpoint, which is by default http://localhost:8080. To do that, you can simply execute:
 
 	$ geth attach http://localhost:8080
 
@@ -43,7 +44,7 @@ To start mining, execute this command on the main geth console:
 	> miner.start(1)
 
 ### Contract deployment
-In order to deploy a contract you can use the *CompileAndDeployContract.sh* script located in *src/deployment*. This script is specifically tailored on the royalty smart contract in order to simplify its deployment.
+In order to deploy the contract you can use the *CompileAndDeployContract.sh* script located in *src/deployment/*. This script is specifically tailored on the Royalty smart contract in order to simplify its deployment.
 
 #### Sample contract
 For demonstration purposes all parameters have a default value in order to provide an example contract to start with. You can deploy the example contract by executing:
@@ -120,7 +121,7 @@ Let's run the following command setting the appropriate options:
 	Generated Royalty.js. To use your contract load this script in geth.
 	
 #### Manual contract variable creation in geth
-If for some reason the contract can't be mined while the *CompileAndDeployContract.sh* script is wating, or you decide to submit its creation when you're not mining, you can still instantiate those variables but you have to do it "manually". A possible output can be the following:
+If for some reason the contract can't be mined while the *CompileAndDeployContract.sh* script is wating, or you decide to submit its creation when you're not mining, you can still instantiate the variables created automatically by *Royalty.js* script, but you have to do it "manually". A possible scenario can be the following:
 
 	$ ./src/deployment/CompileAndDeployContract.sh src/contracts/Royalty.sol
 	Compiling Royalty bin and abi...
@@ -131,7 +132,7 @@ If for some reason the contract can't be mined while the *CompileAndDeployContra
 	Submitted contract creation. TX_Hash: 0xe647968f52cd38e4cc719d0176ca66730cb16d508d8273dc49b7f1d2f7c7160c
 	Finished.
 	
-Once the contract is mined you can get its address with the following command:
+Once the contract is mined you can get its address (*contractAddress*) with the following command:
 
 	> eth.getTransactionReceipt("<paste your transaction hash here>")
 	{
@@ -148,7 +149,7 @@ Once the contract is mined you can get its address with the following command:
 	  transactionHash: "<your transaction hash>",
 	  transactionIndex: 1
 	}
-where *getTransactionReceipt* accepts as argument the transaction hash that submitted your contract creation. If the contract is not mined yet the command above will return *null*.
+where *getTransactionReceipt* accepts as argument the transaction hash that submitted your contract creation. If the contract is not mined yet, the command above will return *null*.
 
 Once you've got the contract address you have to first store the contract ABI in a variable. You can get the contract's ABI in the file *src/contracts/compiled_contracts/Royalty.abi*.
 
@@ -159,7 +160,7 @@ Then you have to parse it and create a contract with that ABI:
 	
 	> RoyaltyAbi = eth.contract(JSON.parse(RoyaltyRawAbi))
 
-Finally you create an instance of the Royalty contract:
+Finally you can create an instance of the Royalty contract:
 
 	> Royalty=RoyaltyAbi.at("<paste your contract address here>")
 ## Usage example
@@ -313,6 +314,6 @@ This smart contract is intended to provide a way to pay for royalties in a decet
 
 For this smart contract first version, only one method of payment is supported: setting a minimum price. The customer is free to pay more than the minimum price. Once the cutomer has payed, the royalty will be valid forever. This method of royalty payment is inspired by a similar method of payment adopted by emerging musical artists: the artist sets a minimum entry price for each song/album and then his fans decide whether he deserves more.
 
-The *resource* if not already available in digital form, needs to be converted in digital format, so that the owner is able to compute its hash (for example SHA256). The owner sets the *resource* minimum price, he decides the resource name and then he is able to create the smart contract. The owner then can publish the smart contract address to let everybody know where to pay for the royalty. He may publish the address on social media, on his company website, or expose a QR code in front of the stage.
+The *resource*, if not already available in digital form, needs to be converted in digital format, so that the owner is able to compute its hash (for example SHA256). The owner sets the *resource* minimum price, he decides the resource name and then he is able to create the smart contract. The owner then can publish the smart contract address to let everybody know where to pay for the royalty. He may publish the address on social media, on his company website, or expose a QR code in front of the stage.
 
 Remember that only the resource hash is stored inside the contract, not the resource itself. It's the owner responsibility not to loose the original version of the resource that originated the hash. For example photographers must securely store .RAW files of their photos, as well as musicians the .WAV files of their songs.
