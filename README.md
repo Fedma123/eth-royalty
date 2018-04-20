@@ -28,7 +28,7 @@ If you are just starting out, or you want to completely reset an existing instan
 	$ ./init/InitializeTestChain.sh
 	
 this directory is already ignored by git.
-The initialization scripts have been brutally copied from [chafey/ethereum-private-network](https://github.com/chafey/ethereum-private-network). Thanks [chafey](https://github.com/chafey) for having allowed me to save some time.
+The initialization resources (*keystore/* and *genesis.json*) have been brutally copied from [chafey/ethereum-private-network](https://github.com/chafey/ethereum-private-network). Thanks [chafey](https://github.com/chafey) for having allowed me to save some time.
 
 #### Interaction
 Now that you have successfully created your local blockchain, you can interact with it through the geth console. In order to start one, you can execute the script *StartConsole.sh*
