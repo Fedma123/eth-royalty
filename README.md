@@ -16,7 +16,7 @@ The project depends on node version v6.11.4 and the following javascript package
 * system-sleep 1.3.6
 * readline-sync 1.4.9
 
-You can install them in the *src/* directory located at project root through *npm* since the directory *src/node_modules* is already ignored by git.
+You can install them in the *src/* directory located at project root through *npm* since the directory *src/node_modules/* is already ignored by git.
 #### solc
 solc is the Solidity compiler. This smart contract is written using solc version 0.4.23. You can install solc by following the official [solc installation instructions](http://solidity.readthedocs.io/en/v0.4.23/installing-solidity.html).
 
@@ -121,7 +121,7 @@ Let's run the following command setting the appropriate options:
 	Generated Royalty.js. To use your contract load this script in geth.
 	
 #### Manual contract variable creation in geth
-If for some reason the contract can't be mined while the *CompileAndDeployContract.sh* script is wating, or you decide to submit its creation when you're not mining, you can still instantiate the variables created automatically by *Royalty.js* script, but you have to do it "manually". A possible scenario can be the following:
+If for some reason the contract can't be mined while the *CompileAndDeployContract.sh* script is waiting, or you decide to submit its creation when you're not mining, you can still instantiate the variables created automatically by *Royalty.js* script, but you have to do it "manually". A possible scenario can be the following:
 
 	$ ./src/deployment/CompileAndDeployContract.sh src/contracts/Royalty.sol
 	Compiling Royalty bin and abi...
@@ -316,4 +316,4 @@ For this smart contract first version, only one method of payment is supported: 
 
 The *resource*, if not already available in digital form, needs to be converted in digital format, so that the owner is able to compute its hash (for example SHA256). The owner sets the *resource* minimum price, he decides the resource name and then he is able to create the smart contract. The owner then can publish the smart contract address to let everybody know where to pay for the royalty. He may publish the address on social media, on his company website, or expose a QR code in front of the stage.
 
-Remember that only the resource hash is stored inside the contract, not the resource itself. It's the owner responsibility not to loose the original version of the resource that originated the hash. For example photographers must securely store .RAW files of their photos, as well as musicians the .WAV files of their songs.
+Remember that only the resource hash is stored inside the contract, not the resource itself. It's the owner responsibility not to lose the original version of the resource that originated the hash. For example photographers must securely store .RAW files of their photos, as well as musicians the .WAV files of their songs.
