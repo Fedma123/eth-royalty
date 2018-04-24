@@ -31,7 +31,7 @@ contract Royalty {
     function Purchase() public payable {
         require(msg.value >= minimumPriceWei);
 
-        if (!HasAlreadyPayed(msg.sender))
+        if (!HasAlreadyPaid(msg.sender))
             payers[msg.sender] = payersIndex.push(msg.sender) - 1;
     }
 
@@ -39,7 +39,7 @@ contract Royalty {
         owner.transfer(address(this).balance);
     }
 
-    function HasAlreadyPayed(address account) public view returns (bool) {
+    function HasAlreadyPaid(address account) public view returns (bool) {
         if (payersIndex.length == 0)
             return false;
 
