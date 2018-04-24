@@ -301,6 +301,64 @@ Carlo can now check that he's withdrawn all his Royalty balance.
 	0
 
 
+
+## Cost estimate
+### Introduction
+On ethereum everything that exercises any kind of load on the system, being it computational or storage related, has to be paid in order to prevent malicious abuse or inadvertent bugs from damaging the blockchain availability and integrity. Contract code, persistent storage and memory allocation require a finite amount of *gas* to be paid in order to be successfully executed. Every contract has some code associated with it, and that code is bytecode that can be interpreted and executed by the Ethereum Virtual Machine (EVM) on every node. The [Ethereum Yellow Paper](http://gavwood.com/paper.pdf) defines for each opcode of the EVM its assocated gas cost. The amount of gas consumed by any transaction is equal to the sum of gas cost of all computational steps executed to complete the transaction. Every transaction must specify beforehand a finite amount of gas that will constitue the maximum amount of gas the sender is willing to spend for this transaction. The sender can also decide how much a unit of gas will cost for the current transaction. This quantity is called *gasPrice*. A higher gas price means a higher incentive for miners to mine the transaction compared to other transactions with lower *gasPrice*. This is because `gasUsed * gasPrice = transactionCost` for the sender, but that transactionCost is actually a reward for the miner who manages to include this transaction in the next block. Hence our transaction will be mined faster.
+
+### Cost estimate breakdown
+The actual cost of a transaction depends on the contract state since it may trigger a branch of execution that returns immediately while, if the state had been different, another more computation intensive branch may have been chosen. For this reason only the most representative cases have been analyzed by executing real transactions against a couple of deployed contracts. Static gas cost estimates [may not be reliable](https://ethereum.stackexchange.com/questions/266/what-are-the-limitations-to-estimategas-and-when-would-its-estimate-be-considera?utm_medium=organic&utm_source=google_rich_qa&utm_campaign=google_rich_qa).
+
+In order to get the *cumulativeGasUsed* value for a transaction, we need to retreive the *transaction receipt* once it's mined by invoking the `eth.getTransactionReceipt()` function in geth,  and passing the transaction hash as argument. In order to invoke a contract method with a transaction in geth, we have to first encode the transaction data by invoking the `getData()` function on the method we're interested in. The value returned by `getData()` contains the contract's method to invoke and its arguments if any, all properly [encoded](https://github.com/ethereum/wiki/wiki/Ethereum-Contract-ABI#argument-encoding). Now we can send the transaction from a valid (and unocked!) account to the smart contract address by invoking the `eth.sendTransaction()` function. Here's an example:
+
+	> Royalty.HasAlreadyPayed.getData(eth.accounts[1]) 
+	"0x99ba9323000000000000000000000000fe2b768a23948eddd7d7caea55baa31e39045382"
+	> eth.sendTransaction({from: eth.accounts[1], to: Royalty.address, data: "0x99ba9323000000000000000000000000fe2b768a23948eddd7d7caea55baa31e39045382"})
+	"0x3ecaf14a06fd6de0958e0c20f4df2b7786bed516f75457c7a78d8419d1573627"
+	> eth.getTransactionReceipt("0x3ecaf14a06fd6de0958e0c20f4df2b7786bed516f75457c7a78d8419d1573627")
+	{
+	  blockHash: "0xccd736cddbafb309b42579d0c57f931d86637e1e5d66ea391a3d07d3f9d13c9f",
+	  blockNumber: 1366,
+	  contractAddress: null,
+	  cumulativeGasUsed: 23989,
+	  from: "0xfe2b768a23948eddd7d7caea55baa31e39045382",
+	  gasUsed: 23989,
+	  logs: [],
+	  logsBloom: "0x00...00",
+	  root: "0xcae07a808b0b0f49cf1d9aa3e00fcaefb2fcc86d601f88823d516e087ebd8e2f",
+	  to: "0x444e52b90cb15e54eaae86167ca62b0ebe69589c",
+	  transactionHash: "0x3ecaf14a06fd6de0958e0c20f4df2b7786bed516f75457c7a78d8419d1573627",
+	  transactionIndex: 0
+	}
+
+As you can see, the cumulative gas used for this transaction is: 23989. If we want this transaction to be processed quickly, we can set the *gasPrice* at a high value (e.g. 2 Gwei), while if we don't care about waiting, we can safely set it pretty low (e.g. 0.4 Gwei). 
+The gas price estimates were taken, at the moment of writing from [ETH Gas Station](https://ethgasstation.info/):
+
+**Ethereum price** (24th April 2018): **524 €/ETH**
+
+Speed|Gas Price (Gwei)
+-------|--------------
+SafeLow (less than 30m) | 0.4
+Standard (less than 5m)  |   1 
+Fast (less than 2m) 	 |  3
+
+By executing transactions against all other contract methods in the same fashion as mentioned above, and with different accounts and arguments, we get the following results.
+
+Method Name|Lowest gas|Safe Low|Standard|Fast|Highest Gas|SafeLow|Standard|Fast
+---------|----------|-------|--------|----|-----------|-------|--------|----
+constructor|536975 (Name 8 chars long)|€ 0.113|€ 0.281|€ 0.844|579774 (Name 47 chars long)|€ 0.122|€ 0.304|€ 0.911
+Purchase|22674 (Account already paid, so this is unusual)|€ 0.005|€ 0.012|€ 0.036|68208 (More frequent: accout never paid)|€ 0.014|€ 0.036|€ 0.107
+Withdraw|29804 (Transaction succeeds)|€ 0.006|€ 0.016|€ 0.047|67436 (Transaction fails: not owner)|€ 0.014|€ 0.035|€ 0.106
+HasAlreadyPaid|23989|€ 0.005|€ 0.013|€ 0.038|23989|€ 0.005|€ 0.013|€ 0.038
+resourceHash|23210|€ 0.005|€ 0.012|€ 0.036|23210|€ 0.005|€ 0.012|€ 0.036
+resourceName|22578 (Name 8 chars long)|€ 0.005|€ 0.012|€ 0.035|22991 (Name 47 chars long)|€ 0.005|€ 0.012|€ 0.036
+contractMinedTimestamp|21766|€ 0.005|€ 0.011|€ 0.034|21766|€ 0.005|€ 0.011|€ 0.034
+minimumPriceWei|21722|€ 0.005|€ 0.011|€ 0.034|21722|€ 0.005|€ 0.011|€ 0.034
+
+In cases where both *Lowest Gas* and *Highest Gas* are the same, no differences in *cumulativeGasUsed* have been found by varying arguments and accounts.
+
+The operational costs found for this smart contract are considered acceptable compared to the typical use case imagined for this smart contract: if the royalty minimum price was set to 0.00095 ETH (almost 5€) the Purchase transaction cost, with a *gasPrice* of 1Gwei and submitted by an account that has never paid, is going to be `0.036€ / 5€ = 0.72%` of the value transferred.
+
 ## Description
 
 ### Summary
@@ -308,6 +366,7 @@ Carlo can now check that he's withdrawn all his Royalty balance.
 * Resource identified by its hash
 * One paying method supported: pay at least minimum price
 * Timestamped contract creation
+
 
 ### Rationale
 This smart contract is intended to provide a way to pay for royalties in a decetralized manner, bypassing any third parties and connecting directly creator and customer. Another useful benefit this smart contract provides, is a way to determine, in case of a dispute, the exact timestamp the *resource* was committed to the blockchain, thus proving the owner's effective ownership of the *resource*. By the term *resource* we mean the entity (song, paper, photo, movie ...) subject to royalties.
