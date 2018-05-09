@@ -82,7 +82,7 @@ Once the geth console has started, execute this command:
 Now, all the abovementioned variables have been automatically created for you, and you can start to interact with your contract. More about contract interaction in **Usage example** below.
 #### Custom contract
 
-The *CompileAndDeployContract.sh* script lets you specify the following option:
+The *CompileAndDeployContract.sh* script lets you specify the following options:
 
 * -s sender 
 (the address of the contract owner)
@@ -185,7 +185,7 @@ When we initialize our local blockchain with this project's scripts, we start wi
 	> Carlo = eth.accounts[2]
 	"0xa9a418da22532bd1189ff8be5cdaf3570bf9da43"
 	
-We load the script so we can conviniently interact with the smart contract through the web3 API.
+We load the script so we can conveniently interact with the smart contract through the web3 API.
 
 	> loadScript('Royalty.js')
 	true
